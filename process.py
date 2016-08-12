@@ -431,10 +431,10 @@ for (region, server, name, specs) in settings.CHARACTER_NAMES:
                     'id': int(boss_id),
                     'name': json_boss_infos['name'],
                     'loot_tables': {
-                        'lfr': [],
-                        'flex': [],
-                        'normal': [],
-                        'heroic': [],
+                        'raid-finder': [],
+                        'raid-normal': [],
+                        'raid-heroic': [],
+                        'raid-mythic': [],
                     }
                 }
 
@@ -516,14 +516,14 @@ for (region, server, name, specs) in settings.CHARACTER_NAMES:
                                 'slot': slot,
                             }
 
-                            if 'lfr' in json_item_infos['difficulties']:
-                                json_boss['loot_tables']['lfr'].append(json_item)
-                            elif 'flex' in json_item_infos['difficulties']:
-                                json_boss['loot_tables']['flex'].append(json_item)
-                            elif 'normal 10' in json_item_infos['difficulties']:
-                                json_boss['loot_tables']['normal'].append(json_item)
-                            elif 'heroic 10' in json_item_infos['difficulties']:
-                                json_boss['loot_tables']['heroic'].append(json_item)
+                            if 'raid-finder' in json_item_infos['difficulties']:
+                                json_boss['loot_tables']['raid-finder'].append(json_item)
+                            elif 'raid-normal' in json_item_infos['difficulties']:
+                                json_boss['loot_tables']['raid-normal'].append(json_item)
+                            elif 'raid-heroic' in json_item_infos['difficulties']:
+                                json_boss['loot_tables']['raid-heroic'].append(json_item)
+                            elif 'raid-mythic' in json_item_infos['difficulties']:
+                                json_boss['loot_tables']['raid-mythic'].append(json_item)
 
                 json_upgrade['boss'].append(json_boss)
 

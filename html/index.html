@@ -35,6 +35,9 @@
         };
 
         var DEFAULT_QUALITY_COLOR = '#9D9D9D';
+        var MAX_ILVL = 800;
+        var MIN_ILVL = 700;
+        var NB_PX_PER_ILVL = 3;
 
 
         function getClassColor(name)
@@ -105,25 +108,26 @@
                     span.className = 'progressbar';
                     $(span).html('&nbsp;');
 
-                    if (spec.ilvl >= 600)
+                    if (spec.ilvl >= MIN_ILVL)
                     {
-                        if (spec.ilvl < 700)
+                        if (spec.ilvl < MAX_ILVL)
                         {
-                            span.style.width = '' + (spec.ilvl - 600) * 3 + 'px';
+                            span.style.width = '' + (spec.ilvl - MIN_ILVL) * NB_PX_PER_ILVL + 'px';
                         }
                         else
                         {
-                            span.style.width = '300px';
+                            span.style.width = '' + NB_PX_PER_ILVL * (MAX_ILVL - MIN_ILVL) + 'px';
                             span.className += ' full';
                         }
 
-                        if (spec.ilvl < 620)
+                        var rangeWidth = (MAX_ILVL - MIN_ILVL) / 5;
+                        if (spec.ilvl < MIN_ILVL + rangeWidth)
                             span.className += ' common';
-                        else if (spec.ilvl < 630)
+                        else if (spec.ilvl < MIN_ILVL + 2 * rangeWidth)
                             span.className += ' uncommon';
-                        else if (spec.ilvl < 640)
+                        else if (spec.ilvl < MIN_ILVL + 3 * rangeWidth)
                             span.className += ' rare';
-                        else if (spec.ilvl < 650)
+                        else if (spec.ilvl < MIN_ILVL + 4 * rangeWidth)
                             span.className += ' epic';
                         else
                             span.className += ' legendary';
@@ -139,13 +143,13 @@
                     span.className = 'progressbar_background';
                     $(span).html('&nbsp;');
 
-                    if (spec.ilvl >= 600)
+                    if (spec.ilvl >= MIN_ILVL)
                     {
-                        span.style.width = '' + (700 - spec.ilvl) * 3 + 'px';
+                        span.style.width = '' + (MAX_ILVL - spec.ilvl) * NB_PX_PER_ILVL + 'px';
                     }
                     else
                     {
-                        span.style.width = '300px';
+                        span.style.width = '' + NB_PX_PER_ILVL * (MAX_ILVL - MIN_ILVL) + 'px';
                         span.className += ' full';
                     }
 
@@ -744,16 +748,11 @@
             {
                 var th = document.createElement('th');
                 th.textContent = data.raids[i].name;
-                th.colSpan = data.raids[i].wings.length * 2 + 2;
+                th.colSpan = data.raids[i].wings.length + 3;
                 tr1.appendChild(th);
 
                 th = document.createElement('th');
                 th.textContent = 'LFR';
-                th.colSpan = data.raids[i].wings.length;
-                tr2.appendChild(th);
-
-                th = document.createElement('th');
-                th.textContent = 'Flex';
                 th.colSpan = data.raids[i].wings.length;
                 tr2.appendChild(th);
 
@@ -767,12 +766,10 @@
                 th.rowSpan = 2;
                 tr2.appendChild(th);
 
-                for (var j = 0; j < data.raids[i].wings.length; ++j)
-                {
-                    th = document.createElement('th');
-                    th.textContent = data.raids[i].wings[j].name;
-                    tr3.appendChild(th);
-                }
+                th = document.createElement('th');
+                th.textContent = 'Mythic';
+                th.rowSpan = 2;
+                tr2.appendChild(th);
 
                 for (var j = 0; j < data.raids[i].wings.length; ++j)
                 {
@@ -816,14 +813,17 @@
                     for (var k = 0; k < data.raids.length; ++k)
                     {
                         var nb_lfr = [];
-                        var nb_flex = [];
-
                         var nb_normal = {
                             nb_upgrades: 0,
                             ilvl_upgrades: {},
                         };
 
                         var nb_heroic = {
+                            nb_upgrades: 0,
+                            ilvl_upgrades: {},
+                        };
+
+                        var nb_mythic = {
                             nb_upgrades: 0,
                             ilvl_upgrades: {},
                         };
@@ -839,30 +839,23 @@
                                 ilvl_upgrades: {},
                             };
 
-                            nb_flex[l] = {
-                                nb_upgrades: 0,
-                                ilvl_upgrades: {},
-                            };
-
                             for (var m = 0; m < raid_upgrade_infos.length; ++m)
                             {
                                 var boss_infos = raid_upgrade_infos[m];
 
-                                _nb_upgrades(boss_infos.loot_tables.lfr, spec.name, nb_lfr[l]);
-                                _nb_upgrades(boss_infos.loot_tables.flex, spec.name, nb_flex[l]);
-                                _nb_upgrades(boss_infos.loot_tables.normal, spec.name, nb_normal);
-                                _nb_upgrades(boss_infos.loot_tables.heroic, spec.name, nb_heroic);
+                                _nb_upgrades(boss_infos.loot_tables['raid-finder'], spec.name, nb_lfr[l]);
+                                _nb_upgrades(boss_infos.loot_tables['raid-normal'], spec.name, nb_normal);
+                                _nb_upgrades(boss_infos.loot_tables['raid-heroic'], spec.name, nb_heroic);
+                                _nb_upgrades(boss_infos.loot_tables['raid-mythic'], spec.name, nb_mythic);
                             }
                         }
 
                         for (var l = 0; l < data.raids[k].wings.length; ++l)
-                            _add_cell(tr, nb_lfr[l], data.raids[k], 'lfr', spec, character);
+                            _add_cell(tr, nb_lfr[l], data.raids[k], 'raid-finder', spec, character);
 
-                        for (var l = 0; l < data.raids[k].wings.length; ++l)
-                            _add_cell(tr, nb_flex[l], data.raids[k], 'flex', spec, character);
-
-                        _add_cell(tr, nb_normal, data.raids[k], 'normal', spec, character);
-                        _add_cell(tr, nb_heroic, data.raids[k], 'heroic', spec, character);
+                        _add_cell(tr, nb_normal, data.raids[k], 'raid-normal', spec, character);
+                        _add_cell(tr, nb_heroic, data.raids[k], 'raid-heroic', spec, character);
+                        _add_cell(tr, nb_mythic, data.raids[k], 'raid-mythic', spec, character);
                     }
                 }
             }
